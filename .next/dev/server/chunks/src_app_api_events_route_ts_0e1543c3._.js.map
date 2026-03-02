@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/J/Documents/trae_projects/timeline/src/app/api/events/route.ts"],"sourcesContent":["import { NextResponse } from \"next/server\";\nimport events from \"@/data/events.json\";\n\nexport async function GET() {\n  try {\n    // Sort events by year\n    const sortedEvents = [...events].sort((a, b) => a.year - b.year);\n\n    return NextResponse.json(sortedEvents);\n  } catch (error) {\n    console.error(\"Error fetching events:\", error);\n    return NextResponse.json(\n      { error: \"Error fetching events\" },\n      { status: 500 }\n    );\n  }\n}\n"],"names":[],"mappings":";;;;AAAA;AACA;;;AAEO,eAAe;IACpB,IAAI;QACF,sBAAsB;QACtB,MAAM,eAAe;eAAI,wGAAM;SAAC,CAAC,IAAI,CAAC,CAAC,GAAG,IAAM,EAAE,IAAI,GAAG,EAAE,IAAI;QAE/D,OAAO,gJAAY,CAAC,IAAI,CAAC;IAC3B,EAAE,OAAO,OAAO;QACd,QAAQ,KAAK,CAAC,0BAA0B;QACxC,OAAO,gJAAY,CAAC,IAAI,CACtB;YAAE,OAAO;QAAwB,GACjC;YAAE,QAAQ;QAAI;IAElB;AACF"}}]
+}

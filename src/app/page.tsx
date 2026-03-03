@@ -32,17 +32,17 @@ export default function Home() {
         data-aida="interest"
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        <div className="bg-white border-structure shadow-hard p-8 flex flex-col gap-4">
+        <div className="bg-white border-structure shadow-hard p-8 flex flex-col gap-4 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] transition-all duration-200">
           <Clock className="w-12 h-12 text-intent-attention" />
           <h3 className="text-2xl">Cronología Precisa</h3>
           <p className="text-sm">Explora eventos en orden histórico real, con referencias teológicas y arqueológicas.</p>
         </div>
-        <div className="bg-white border-structure shadow-hard p-8 flex flex-col gap-4">
+        <div className="bg-white border-structure shadow-hard p-8 flex flex-col gap-4 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] transition-all duration-200">
           <BookOpen className="w-12 h-12 text-intent-attention" />
           <h3 className="text-2xl">Versículos Clave</h3>
           <p className="text-sm">Acceso directo a las Escrituras que fundamentan cada momento histórico.</p>
         </div>
-        <div className="bg-white border-structure shadow-hard p-8 flex flex-col gap-4">
+        <div className="bg-white border-structure shadow-hard p-8 flex flex-col gap-4 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] transition-all duration-200">
           <MapPin className="w-12 h-12 text-intent-attention" />
           <h3 className="text-2xl">Contexto Geográfico</h3>
           <p className="text-sm">Mapas e ilustraciones que sitúan cada evento en el mundo antiguo.</p>

@@ -39,15 +39,14 @@ export default function EraSelector({ eras, onSelectEra }: EraSelectorProps) {
   };
 
   return (
-    <div className="min-h-[90vh] flex flex-col justify-center gap-12 max-w-7xl mx-auto w-full px-6 py-12">
-      <header className="flex flex-col gap-4 text-center md:text-left">
+    <div className="min-h-[80vh] flex flex-col justify-start gap-8 max-w-7xl mx-auto w-full px-6 py-8">
+      <header className="flex flex-col gap-2 text-center md:text-left">
         <motion.h2 
           initial={{ x: -30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.8] mb-4"
+          className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none"
         >
-          BIBLICAL <br />
-          <span className="text-intent-attention">TIMELINE</span>
+          BIBLICAL <span className="text-intent-attention">TIMELINE</span>
         </motion.h2>
         <div className="h-2 w-32 bg-intent-action mx-auto md:mx-0 shadow-hard"></div>
       </header>
@@ -56,7 +55,7 @@ export default function EraSelector({ eras, onSelectEra }: EraSelectorProps) {
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-12"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
       >
         {eras.map((era) => (
           <motion.div

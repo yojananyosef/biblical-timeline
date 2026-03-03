@@ -4,9 +4,12 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import TimelineCard from "./TimelineCard";
 import EraSelector from "./EraSelector";
-import { ChevronLeft, ChevronRight, Home, LayoutGrid } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home, LayoutGrid, Wind, EyeOff } from "lucide-react";
 import Link from "next/link";
 import TimeScale from "./TimeScale";
+function cn(...inputs: (string | false | null | undefined)[]) {
+  return inputs.filter(Boolean).join(" ");
+}
 
 interface BiblicalEvent {
   id: string;
@@ -36,6 +39,7 @@ export default function TimelineContainer() {
   const [activeEra, setActiveEra] = useState<string>("");
   const [currentYear, setCurrentYear] = useState<number>(0);
   const [scrollPercent, setScrollPercent] = useState<number>(0);
+  const [isCalmMode, setIsCalmMode] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -242,9 +246,15 @@ export default function TimelineContainer() {
   }
 
   return (
-    <div className="relative flex-1 flex flex-col bg-canvas overflow-hidden min-h-screen">
+    <div className={cn(
+      "relative flex-1 flex flex-col transition-colors duration-1000 overflow-hidden min-h-screen",
+      isCalmMode ? "bg-stone-100" : "bg-canvas"
+    )}>
       {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center bg-canvas/80 backdrop-blur-sm border-b-structure border-black">
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center transition-all duration-700",
+        isCalmMode ? "opacity-0 pointer-events-none translate-y-[-20px]" : "bg-canvas/80 backdrop-blur-sm border-b-structure border-black"
+      )}>
         <div className="flex gap-2 md:gap-4">
           <Link href="/" className="btn-secondary flex items-center gap-2 bg-white text-xs md:text-base">
             <Home className="w-4 h-4 md:w-5 h-5" />
@@ -262,7 +272,7 @@ export default function TimelineContainer() {
         </div>
 
         {viewMode === "timeline" && (
-          <div className="flex gap-2 md:gap-4">
+          <div className="flex gap-2 md:gap-4 items-center">
             <button 
               onClick={() => scroll("left")}
               className="btn-secondary bg-white p-2"
@@ -277,9 +287,25 @@ export default function TimelineContainer() {
             >
               <ChevronRight className="w-5 h-5 md:w-6 h-6" />
             </button>
+            
+            {/* Floating Calm Mode Toggle Integrado */}
+            <button
+              onClick={() => setIsCalmMode(!isCalmMode)}
+              className={cn(
+                "p-2 rounded-full border-2 border-black shadow-hard transition-all duration-500 group relative",
+                isCalmMode 
+                  ? "bg-stone-800 text-stone-100 rotate-180 scale-110" 
+                  : "bg-white text-black hover:bg-intent-action hover:text-white"
+              )}
+              title={isCalmMode ? "Salir del Modo Calma" : "Activar Modo Calma"}
+            >
+              {isCalmMode ? <EyeOff className="w-5 h-5 md:w-6 h-6" /> : <Wind className="w-5 h-5 md:w-6 h-6" />}
+            </button>
           </div>
         )}
       </nav>
+
+      {/* Eliminamos el botón fijo de antes ya que ahora está en la nav */}
 
       <AnimatePresence mode="wait">
         {viewMode === "eras" ? (
@@ -303,7 +329,10 @@ export default function TimelineContainer() {
             {/* Timeline Scrollable Area */}
             <div 
               ref={containerRef}
-              className="flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory flex items-center gap-[5vw] px-[10vw] no-scrollbar pb-24"
+              className={cn(
+                "flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory flex items-center gap-[5vw] px-[10vw] no-scrollbar pb-24 transition-all duration-1000",
+                isCalmMode ? "gap-[15vw] brightness-95 grayscale-[0.3]" : ""
+              )}
             >
               {events.map((event, index) => (
                 <div 
@@ -317,18 +346,38 @@ export default function TimelineContainer() {
             </div>
 
             {/* TimeScale Component for Progression Sense */}
-            <TimeScale 
-              currentYear={currentYear} 
-              progress={scrollPercent} 
-              era={activeEra}
-            />
+            <div className={cn(
+              "transition-all duration-700",
+              isCalmMode ? "opacity-30 scale-95 translate-y-4" : "opacity-100"
+            )}>
+              <TimeScale 
+                currentYear={currentYear} 
+                progress={scrollPercent} 
+                era={activeEra}
+              />
+            </div>
 
             {/* Background Text Decor */}
-            <div className="fixed top-1/2 left-0 right-0 -z-10 opacity-[0.01] md:opacity-[0.02] select-none pointer-events-none -translate-y-1/2 overflow-hidden">
+            <div className={cn(
+              "fixed top-1/2 left-0 right-0 -z-10 select-none pointer-events-none -translate-y-1/2 overflow-hidden transition-opacity duration-1000",
+              isCalmMode ? "opacity-0" : "opacity-[0.01] md:opacity-[0.02]"
+            )}>
               <h2 className="text-[25vw] md:text-[30vw] leading-none font-black text-black whitespace-nowrap text-center">
                 {activeEra.split(' ')[2] || 'HISTORIA'}
               </h2>
             </div>
+
+            {/* Ambient Background Elements for Calm Mode */}
+            <AnimatePresence>
+              {isCalmMode && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-stone-200 via-stone-100 to-stone-50"
+                />
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

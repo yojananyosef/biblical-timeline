@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Book, Quote, Info, X, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface BiblicalEvent {
   id: string;
@@ -23,6 +24,11 @@ interface TimelineCardProps {
 
 export default function TimelineCard({ event, index }: TimelineCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -75,74 +81,78 @@ export default function TimelineCard({ event, index }: TimelineCardProps) {
         </footer>
       </motion.article>
 
-      {/* EVENT MODAL */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-4xl bg-canvas border-structure border-black shadow-hard flex flex-col md:flex-row overflow-hidden max-h-[90vh]"
-            >
-              <button 
+      {/* EVENT MODAL - PORTALED to Body to avoid z-index/transform issues */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {isModalOpen && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 isolate">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 p-2 bg-white border-2 border-black shadow-hard hover:bg-intent-danger hover:text-white transition-all z-[110]"
+                className="fixed inset-0 bg-black/80 backdrop-blur-md"
+                style={{ zIndex: -1 }}
+              />
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="relative w-full max-w-4xl bg-canvas border-structure border-black shadow-hard flex flex-col md:flex-row overflow-hidden max-h-[90vh] z-10"
               >
-                <X className="w-8 h-8" />
-              </button>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute top-4 right-4 p-2 bg-white border-2 border-black shadow-hard hover:bg-intent-danger hover:text-white transition-all z-[110]"
+                >
+                  <X className="w-8 h-8" />
+                </button>
 
-              {/* Image Section (if available) */}
-              {event.imageUrl && (
-                <div className="md:w-1/3 bg-black flex items-center justify-center border-b-4 md:border-b-0 md:border-r-4 border-black">
-                  <img 
-                    src={event.imageUrl} 
-                    alt={event.title} 
-                    className="w-full h-full object-cover opacity-80"
-                  />
+                {/* Image Section (if available) */}
+                {event.imageUrl && (
+                  <div className="md:w-1/3 bg-black flex items-center justify-center border-b-4 md:border-b-0 md:border-r-4 border-black">
+                    <img 
+                      src={event.imageUrl} 
+                      alt={event.title} 
+                      className="w-full h-full object-cover opacity-80"
+                    />
+                  </div>
+                )}
+
+                {/* Content Section */}
+                <div className={`flex-1 p-8 md:p-12 overflow-y-auto ${!event.imageUrl ? 'w-full' : ''}`}>
+                  <header className="mb-8">
+                    <span className="text-intent-attention font-black tracking-widest text-xs uppercase mb-2 block">
+                      {event.date} • {event.category}
+                    </span>
+                    <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">
+                      {event.title}
+                    </h2>
+                    <div className="h-2 w-24 bg-intent-action shadow-hard"></div>
+                  </header>
+
+                  <div className="prose prose-xl max-w-none font-medium text-text-main/90 mb-8">
+                    <div 
+                      dangerouslySetInnerHTML={{ __html: event.fullArticle || event.description }} 
+                      className="article-content"
+                    />
+                  </div>
+
+                  <div className="p-6 bg-white border-structure border-black shadow-hard mt-8">
+                    <h4 className="text-lg font-black uppercase mb-4 flex items-center gap-2 text-intent-attention">
+                      <ExternalLink className="w-5 h-5" />
+                      Versículo de Referencia
+                    </h4>
+                    <p className="text-xl font-bold italic leading-relaxed">
+                      "{event.verse}"
+                    </p>
+                  </div>
                 </div>
-              )}
-
-              {/* Content Section */}
-              <div className={`flex-1 p-8 md:p-12 overflow-y-auto ${!event.imageUrl ? 'w-full' : ''}`}>
-                <header className="mb-8">
-                  <span className="text-intent-attention font-black tracking-widest text-xs uppercase mb-2 block">
-                    {event.date} • {event.category}
-                  </span>
-                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">
-                    {event.title}
-                  </h2>
-                  <div className="h-2 w-24 bg-intent-action shadow-hard"></div>
-                </header>
-
-                <div className="prose prose-xl max-w-none font-medium text-text-main/90 mb-8">
-                  <div 
-                    dangerouslySetInnerHTML={{ __html: event.fullArticle || event.description }} 
-                    className="article-content"
-                  />
-                </div>
-
-                <div className="p-6 bg-white border-structure border-black shadow-hard mt-8">
-                  <h4 className="text-lg font-black uppercase mb-4 flex items-center gap-2 text-intent-attention">
-                    <ExternalLink className="w-5 h-5" />
-                    Versículo de Referencia
-                  </h4>
-                  <p className="text-xl font-bold italic leading-relaxed">
-                    "{event.verse}"
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

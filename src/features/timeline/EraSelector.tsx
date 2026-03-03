@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, BookOpen, Info, X, ChevronRight } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface Era {
   name: string;
@@ -18,6 +19,11 @@ interface EraSelectorProps {
 
 export default function EraSelector({ eras, onSelectEra }: EraSelectorProps) {
   const [selectedEraForModal, setSelectedEraForModal] = useState<Era | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const container = {
     hidden: { opacity: 0 },
@@ -102,77 +108,75 @@ export default function EraSelector({ eras, onSelectEra }: EraSelectorProps) {
         ))}
       </motion.div>
 
-      {/* ERA MODAL */}
-      <AnimatePresence>
-        {selectedEraForModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedEraForModal(null)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, rotate: -1 }}
-              animate={{ scale: 1, opacity: 1, rotate: 0 }}
-              exit={{ scale: 0.9, opacity: 0, rotate: 1 }}
-              className="relative w-full max-w-4xl bg-canvas border-structure border-black shadow-hard p-8 md:p-12 overflow-y-auto max-h-[90vh]"
-            >
-              <button 
+      {/* ERA MODAL - PORTALED */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {selectedEraForModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 isolate">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 onClick={() => setSelectedEraForModal(null)}
-                className="absolute top-4 right-4 p-2 bg-white border-2 border-black shadow-hard hover:bg-intent-danger hover:text-white transition-all z-50"
+                className="fixed inset-0 bg-black/80 backdrop-blur-md"
+                style={{ zIndex: -1 }}
+              />
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0, rotate: -1 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.9, opacity: 0, rotate: 1 }}
+                className="relative w-full max-w-4xl bg-canvas border-structure border-black shadow-hard p-8 md:p-12 overflow-y-auto max-h-[90vh] z-10"
               >
-                <X className="w-8 h-8" />
-              </button>
+                <button 
+                  onClick={() => setSelectedEraForModal(null)}
+                  className="absolute top-4 right-4 p-2 bg-white border-2 border-black shadow-hard hover:bg-intent-danger hover:text-white transition-all z-50"
+                >
+                  <X className="w-8 h-8" />
+                </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="flex flex-col gap-6">
-                  <header>
-                    <span className="text-intent-attention font-black tracking-widest text-xs uppercase mb-2 block">Resumen de la Era</span>
-                    <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
-                      {selectedEraForModal.name}
-                    </h2>
-                  </header>
-                  <div className="h-2 w-24 bg-intent-action shadow-hard"></div>
-                  <p className="text-xl font-bold leading-relaxed opacity-80">
-                    {selectedEraForModal.description}
-                  </p>
-                  
-                  <div className="p-6 bg-white border-structure border-black shadow-hard">
-                    <h4 className="text-lg font-black uppercase mb-4 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-intent-attention" />
-                      Visión Teológica
-                    </h4>
-                    <p className="text-sm opacity-90 italic leading-relaxed">
-                      Este periodo es fundamental para entender el plan de salvación. Desde los pactos iniciales hasta el cumplimiento de las profecías, cada evento construye la narrativa de la fe.
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="flex flex-col gap-6">
+                    <header>
+                      <span className="text-intent-attention font-black tracking-widest text-xs uppercase mb-2 block">Resumen de la Era</span>
+                      <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
+                        {selectedEraForModal.name}
+                      </h2>
+                      <div className="h-2 w-24 bg-intent-action shadow-hard"></div>
+                    </header>
+                    
+                    <p className="text-lg md:text-xl font-medium leading-relaxed">
+                      {selectedEraForModal.description}
                     </p>
                   </div>
-                </div>
 
-                <div className="flex flex-col gap-4 bg-black/5 p-6 border-structure border-black">
-                  <h4 className="text-xl font-black uppercase tracking-tighter mb-4">Cronología de la Era</h4>
-                  <div className="flex flex-col gap-3">
-                    {selectedEraForModal.periods.map((p) => (
-                      <button
-                        key={p.name}
-                        onClick={() => {
-                          onSelectEra(p.firstEventId);
-                          setSelectedEraForModal(null);
-                        }}
-                        className="flex items-center justify-between p-4 bg-white border-2 border-black shadow-hard hover:bg-intent-action hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all text-left"
-                      >
-                        <span className="text-sm font-black uppercase tracking-widest">{p.name}</span>
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                    ))}
+                  <div className="flex flex-col gap-4">
+                    <h3 className="text-xl font-black uppercase mb-4 flex items-center gap-2">
+                      <BookOpen className="w-6 h-6" />
+                      Periodos Clave
+                    </h3>
+                    <div className="flex flex-col gap-3">
+                      {selectedEraForModal.periods.map((p) => (
+                        <button
+                          key={p.name}
+                          onClick={() => {
+                            onSelectEra(p.firstEventId);
+                            setSelectedEraForModal(null);
+                          }}
+                          className="flex items-center justify-between p-4 bg-white border-2 border-black shadow-hard hover:bg-intent-action hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all text-left"
+                        >
+                          <span className="text-sm font-black uppercase tracking-widest">{p.name}</span>
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

@@ -49,36 +49,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ❤️ PHASE 3: DESIRE (Calm Mode / Confidence) */}
-      <section 
-        data-aida="desire"
-        className="border-structure bg-intent-attention text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8"
-      >
-        <div className="flex flex-col gap-2">
-          <h2 className="text-4xl">MODO CALMA</h2>
-          <p className="max-w-[40ch] opacity-90">¿Demasiado estímulo? Activa el modo calma para una lectura más profunda y reflexiva.</p>
-        </div>
-        <button className="btn-secondary bg-white text-text-main border-black">
-          Próximamente
-        </button>
-      </section>
-
       {/* ⚡ PHASE 4: ACTION (Primary CTA) */}
       <section 
         data-aida="action"
-        className="flex flex-col items-center justify-center py-12"
+        className="flex flex-col items-center justify-center py-12 gap-12"
       >
-        <Link 
-          href="/timeline" 
-          data-cta="primary"
-          className="text-3xl md:text-4xl px-12 py-8 group"
-        >
-          EXPLORAR HISTORIA
-          <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
-        </Link>
-        <p className="mt-4 text-sm font-bold uppercase tracking-widest opacity-60">
-          Experiencia gratuita y abierta
-        </p>
+        <div className="flex flex-col items-center gap-4">
+          <Link 
+            href="/timeline" 
+            data-cta="primary"
+            className="text-3xl md:text-4xl px-12 py-8 group"
+          >
+            EXPLORAR HISTORIA
+            <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+          </Link>
+          <p className="text-sm font-bold uppercase tracking-widest opacity-60">
+            Experiencia gratuita y abierta
+          </p>
+        </div>
+
+        {/* Calm Mode Info (Moved) */}
+        <div className="flex flex-col items-center text-center gap-2 max-w-md border-2 border-black/10 p-6 rounded-lg bg-stone-50">
+          <h3 className="font-bold text-lg">MODO CALMA DISPONIBLE</h3>
+          <p className="text-sm opacity-80">
+            ¿Demasiado estímulo? Podrás activar el modo calma dentro de la experiencia para una lectura más profunda y reflexiva.
+          </p>
+        </div>
       </section>
 
     </div>

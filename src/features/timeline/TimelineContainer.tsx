@@ -253,9 +253,9 @@ export default function TimelineContainer() {
       {/* Navigation Bar */}
       <nav className={cn(
         "fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center transition-all duration-700",
-        isCalmMode ? "opacity-0 pointer-events-none translate-y-[-20px]" : "bg-canvas/80 backdrop-blur-sm border-b-structure border-black"
+        isCalmMode ? "pointer-events-none" : "bg-canvas/80 backdrop-blur-sm border-b-structure border-black"
       )}>
-        <div className="flex gap-2 md:gap-4">
+        <div className={cn("flex gap-2 md:gap-4 transition-opacity duration-700", isCalmMode && "opacity-0")}>
           <Link href="/" className="btn-secondary flex items-center gap-2 bg-white text-xs md:text-base">
             <Home className="w-4 h-4 md:w-5 h-5" />
             <span className="hidden sm:inline">INICIO</span>
@@ -275,14 +275,14 @@ export default function TimelineContainer() {
           <div className="flex gap-2 md:gap-4 items-center">
             <button 
               onClick={() => scroll("left")}
-              className="btn-secondary bg-white p-2"
+              className={cn("btn-secondary bg-white p-2 transition-opacity duration-700", isCalmMode && "opacity-0")}
               aria-label="Desplazar a la izquierda"
             >
               <ChevronLeft className="w-5 h-5 md:w-6 h-6" />
             </button>
             <button 
               onClick={() => scroll("right")}
-              className="btn-secondary bg-white p-2"
+              className={cn("btn-secondary bg-white p-2 transition-opacity duration-700", isCalmMode && "opacity-0")}
               aria-label="Desplazar a la derecha"
             >
               <ChevronRight className="w-5 h-5 md:w-6 h-6" />
@@ -292,7 +292,7 @@ export default function TimelineContainer() {
             <button
               onClick={() => setIsCalmMode(!isCalmMode)}
               className={cn(
-                "p-2 rounded-full border-2 border-black shadow-hard transition-all duration-500 group relative",
+                "p-2 rounded-full border-2 border-black shadow-hard transition-all duration-500 group relative pointer-events-auto",
                 isCalmMode 
                   ? "bg-stone-800 text-stone-100 rotate-180 scale-110" 
                   : "bg-white text-black hover:bg-intent-action hover:text-white"
@@ -338,7 +338,7 @@ export default function TimelineContainer() {
                 <div 
                   key={event.id} 
                   id={`event-${event.id}`}
-                  className="snap-center"
+                  className="snap-center relative z-10"
                 >
                   <TimelineCard event={event} index={index} />
                 </div>

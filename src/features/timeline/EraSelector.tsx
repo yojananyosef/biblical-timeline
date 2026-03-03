@@ -32,7 +32,7 @@ export default function EraSelector({ eras, onSelectEra }: EraSelectorProps) {
   };
 
   return (
-    <div className="min-h-[80vh] flex flex-col justify-start gap-8 max-w-7xl mx-auto w-full px-6 py-8">
+    <div className="min-h-[80vh] flex flex-col justify-start gap-8 max-w-7xl mx-auto w-full px-6">
       <header className="flex flex-col gap-2 text-center md:text-left">
         <motion.h2 
           initial={{ x: -30, opacity: 0 }}
@@ -57,7 +57,7 @@ export default function EraSelector({ eras, onSelectEra }: EraSelectorProps) {
             className="group relative flex flex-col border-structure border-black bg-white shadow-hard hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[12px_12px_0_0_#000] transition-all duration-200"
           >
             {/* ERA HEADER (Arch Style) */}
-            <div className="bg-black text-white p-6 text-center border-b-4 border-black">
+            <div className="bg-black text-white px-6 py-4 text-center border-b-4 border-black">
               <h3 className="text-2xl font-black uppercase tracking-widest">{era.name}</h3>
             </div>
 

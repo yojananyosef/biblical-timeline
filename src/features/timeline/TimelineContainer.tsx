@@ -42,6 +42,7 @@ export default function TimelineContainer() {
   const [isCalmMode, setIsCalmMode] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeIndexRef = useRef<number>(0); // Track active index efficiently without state lag
   
   const { scrollXProgress } = useScroll({ container: containerRef });
   const scaleX = useSpring(scrollXProgress, {
@@ -136,30 +137,52 @@ export default function TimelineContainer() {
       const progress = scrollLeft / (scrollWidth - offsetWidth);
       setScrollPercent(progress);
 
-      // DETECCIÓN BASADA EN POSICIÓN FÍSICA REAL (Viewport Center)
+      // Optimización: Búsqueda Local O(1)
+      // En lugar de escanear todos los elementos, verificamos el actual y sus vecinos
+      // para ver cuál está más cerca del centro.
       const viewportCenter = window.innerWidth / 2;
-      const cardElements = container.querySelectorAll('[id^="event-"]');
+      const currentIdx = activeIndexRef.current;
       
-      const eventsDistances = Array.from(cardElements).map((el) => {
-        const rect = el.getBoundingClientRect();
+      // Elementos a verificar: actual, anterior y siguiente
+      const indicesToCheck = [currentIdx, currentIdx - 1, currentIdx + 1].filter(
+        i => i >= 0 && i < events.length
+      );
+
+      let bestIndex = currentIdx;
+      let minDistance = Infinity;
+
+      // Primero verificamos el actual para tener una base
+      const currentEl = document.getElementById(`event-${events[currentIdx]?.id}`);
+      if (currentEl) {
+        const rect = currentEl.getBoundingClientRect();
         const elCenter = rect.left + (rect.width / 2);
-        const distance = Math.abs(viewportCenter - elCenter);
-        return { el, distance, rect, elCenter };
-      }).sort((a, b) => a.distance - b.distance);
+        minDistance = Math.abs(viewportCenter - elCenter);
+      }
 
-      if (eventsDistances.length > 0) {
-        const closest = eventsDistances[0];
-        const id = closest.el.id.replace('event-', '');
-        const closestEvent = events.find(e => e.id === id);
+      // Verificamos vecinos
+      for (const idx of indicesToCheck) {
+        if (idx === currentIdx) continue; // Ya verificado
+        
+        const el = document.getElementById(`event-${events[idx]?.id}`);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const elCenter = rect.left + (rect.width / 2);
+          const distance = Math.abs(viewportCenter - elCenter);
+          
+          if (distance < minDistance) {
+            minDistance = distance;
+            bestIndex = idx;
+          }
+        }
+      }
 
-        if (closestEvent) {
-          setActiveEra(closestEvent.era);
-          // Actualización DIRECTA y DINÁMICA
-          // Usamos el año del evento más cercano como base
-          // Para "interpolación visual", podríamos usar la distancia relativa
-          // Pero para evitar saltos extraños, mostramos el año del evento enfocado
-          // que cambia dinámicamente al hacer scroll.
-          setCurrentYear(closestEvent.year);
+      // Si encontramos un mejor índice, actualizamos
+      if (bestIndex !== currentIdx) {
+        activeIndexRef.current = bestIndex;
+        const bestEvent = events[bestIndex];
+        if (bestEvent) {
+          setActiveEra(bestEvent.era);
+          setCurrentYear(bestEvent.year);
         }
       }
       
@@ -197,9 +220,11 @@ export default function TimelineContainer() {
   const handleSelectEra = (eventId: string) => {
     setViewMode("timeline");
     
-    // Seteamos el año inmediatamente si es posible
-    const initialEvent = events.find(e => e.id === eventId);
-    if (initialEvent) {
+    // Encontrar índice y actualizar ref inmediatamente
+    const index = events.findIndex(e => e.id === eventId);
+    if (index !== -1) {
+      activeIndexRef.current = index;
+      const initialEvent = events[index];
       setCurrentYear(initialEvent.year);
       setActiveEra(initialEvent.era);
     }
@@ -228,41 +253,30 @@ export default function TimelineContainer() {
 
   const scroll = (direction: "left" | "right") => {
     if (containerRef.current) {
-      // Navegación por Eventos en lugar de píxeles fijos
-      const container = containerRef.current;
-      const viewportCenter = window.innerWidth / 2;
-      const cardElements = container.querySelectorAll('[id^="event-"]');
-      
-      const eventsDistances = Array.from(cardElements).map((el, index) => {
-        const rect = el.getBoundingClientRect();
-        const elCenter = rect.left + (rect.width / 2);
-        const distance = Math.abs(viewportCenter - elCenter);
-        return { el, distance, index };
-      }).sort((a, b) => a.distance - b.distance);
+      // Navegación Instantánea basada en índice (O(1))
+      const currentIndex = activeIndexRef.current;
+      let nextIndex = direction === "left" ? currentIndex - 1 : currentIndex + 1;
 
-      if (eventsDistances.length > 0) {
-        const currentFocusedIndex = eventsDistances[0].index;
-        let targetIndex = direction === "left" ? currentFocusedIndex - 1 : currentFocusedIndex + 1;
+      // Limites
+      if (nextIndex < 0) nextIndex = 0;
+      if (nextIndex >= events.length) nextIndex = events.length - 1;
 
-        // Limites
-        if (targetIndex < 0) targetIndex = 0;
-        if (targetIndex >= cardElements.length) targetIndex = cardElements.length - 1;
+      // 1. Actualizar estado VISUAL inmediatamente (sin esperar scroll)
+      const targetEvent = events[nextIndex];
+      if (targetEvent) {
+        setCurrentYear(targetEvent.year);
+        setActiveEra(targetEvent.era);
+        activeIndexRef.current = nextIndex; // Actualizamos ref para la siguiente acción
+      }
 
-        // ACTUALIZACIÓN DE ESTADO INMEDIATA
-        const targetEvent = events[targetIndex];
-        if (targetEvent) {
-          setCurrentYear(targetEvent.year);
-          setActiveEra(targetEvent.era);
-        }
-
-        const targetEl = cardElements[targetIndex];
-        if (targetEl) {
-          targetEl.scrollIntoView({
-            behavior: "smooth",
-            inline: "center",
-            block: "nearest"
-          });
-        }
+      // 2. Iniciar Scroll Suave
+      const targetEl = document.getElementById(`event-${targetEvent?.id}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest"
+        });
       }
     }
   };

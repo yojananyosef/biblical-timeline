@@ -14,7 +14,7 @@ export default function TimeScale({ currentYear, progress, era }: TimeScaleProps
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-24 bg-black text-white z-[60] flex flex-col border-t-4 border-intent-action overflow-hidden">
+    <div className="fixed bottom-0 left-0 right-0 h-24 bg-black text-white z-[60] flex flex-col border-t-4 border-intent-action">
       {/* Indicator Center Line */}
       <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-intent-action z-10 shadow-[0_0_15px_rgba(255,222,89,0.5)]"></div>
 
@@ -24,8 +24,8 @@ export default function TimeScale({ currentYear, progress, era }: TimeScaleProps
       </div>
 
       {/* Year Label Center */}
-      <div className="absolute left-1/2 -translate-x-1/2 -top-6 bg-black border-2 border-intent-action px-6 py-2 z-20 shadow-hard">
-        <span className="text-2xl font-black tracking-tighter text-intent-action">
+      <div className="absolute left-1/2 -translate-x-1/2 -top-5 bg-black border-2 border-intent-action px-6 py-2 z-20 shadow-hard flex items-center justify-center">
+        <span className="text-2xl font-black tracking-tighter text-intent-action tabular-nums">
           {formatYear(currentYear)}
         </span>
       </div>

@@ -140,24 +140,27 @@ export default function TimelineContainer() {
       const viewportCenter = window.innerWidth / 2;
       const cardElements = container.querySelectorAll('[id^="event-"]');
       
-      let closestEvent = null;
-      let minDistance = Infinity;
-
-      cardElements.forEach((el) => {
+      const eventsDistances = Array.from(cardElements).map((el) => {
         const rect = el.getBoundingClientRect();
         const elCenter = rect.left + (rect.width / 2);
         const distance = Math.abs(viewportCenter - elCenter);
+        return { el, distance, rect, elCenter };
+      }).sort((a, b) => a.distance - b.distance);
 
-        if (distance < minDistance) {
-          minDistance = distance;
-          const id = el.id.replace('event-', '');
-          closestEvent = events.find(e => e.id === id);
+      if (eventsDistances.length > 0) {
+        const closest = eventsDistances[0];
+        const id = closest.el.id.replace('event-', '');
+        const closestEvent = events.find(e => e.id === id);
+
+        if (closestEvent) {
+          setActiveEra(closestEvent.era);
+          // Actualización DIRECTA y DINÁMICA
+          // Usamos el año del evento más cercano como base
+          // Para "interpolación visual", podríamos usar la distancia relativa
+          // Pero para evitar saltos extraños, mostramos el año del evento enfocado
+          // que cambia dinámicamente al hacer scroll.
+          setCurrentYear(closestEvent.year);
         }
-      });
-
-      if (closestEvent) {
-        setActiveEra((closestEvent as BiblicalEvent).era);
-        setCurrentYear((closestEvent as BiblicalEvent).year);
       }
       
       ticking = false;
@@ -225,11 +228,42 @@ export default function TimelineContainer() {
 
   const scroll = (direction: "left" | "right") => {
     if (containerRef.current) {
-      const scrollAmount = window.innerWidth * 0.6;
-      containerRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth"
-      });
+      // Navegación por Eventos en lugar de píxeles fijos
+      const container = containerRef.current;
+      const viewportCenter = window.innerWidth / 2;
+      const cardElements = container.querySelectorAll('[id^="event-"]');
+      
+      const eventsDistances = Array.from(cardElements).map((el, index) => {
+        const rect = el.getBoundingClientRect();
+        const elCenter = rect.left + (rect.width / 2);
+        const distance = Math.abs(viewportCenter - elCenter);
+        return { el, distance, index };
+      }).sort((a, b) => a.distance - b.distance);
+
+      if (eventsDistances.length > 0) {
+        const currentFocusedIndex = eventsDistances[0].index;
+        let targetIndex = direction === "left" ? currentFocusedIndex - 1 : currentFocusedIndex + 1;
+
+        // Limites
+        if (targetIndex < 0) targetIndex = 0;
+        if (targetIndex >= cardElements.length) targetIndex = cardElements.length - 1;
+
+        // ACTUALIZACIÓN DE ESTADO INMEDIATA
+        const targetEvent = events[targetIndex];
+        if (targetEvent) {
+          setCurrentYear(targetEvent.year);
+          setActiveEra(targetEvent.era);
+        }
+
+        const targetEl = cardElements[targetIndex];
+        if (targetEl) {
+          targetEl.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest"
+          });
+        }
+      }
     }
   };
 

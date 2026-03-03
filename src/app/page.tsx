@@ -67,14 +67,15 @@ export default function Home() {
             Experiencia gratuita y abierta
           </p>
         </div>
+      </section>
 
-        {/* Calm Mode Info (Moved) */}
-        <div className="flex flex-col items-center text-center gap-2 max-w-md border-2 border-black/10 p-6 rounded-lg bg-stone-50">
-          <h3 className="font-bold text-lg">MODO CALMA DISPONIBLE</h3>
-          <p className="text-sm opacity-80">
-            ¿Demasiado estímulo? Podrás activar el modo calma dentro de la experiencia para una lectura más profunda y reflexiva.
-          </p>
-        </div>
+      {/* ❤️ PHASE 3: DESIRE (Calm Mode / Confidence) */}
+      <section 
+        data-aida="desire"
+        className="border-structure bg-intent-attention text-white p-8 md:p-12 flex flex-col items-center text-center gap-4"
+      >
+        <h2 className="text-4xl">MODO CALMA DISPONIBLE!</h2>
+        <p className="max-w-[50ch] opacity-90">¿Demasiado estímulo? Activa el modo calma para una lectura más profunda y reflexiva.</p>
       </section>
 
     </div>
